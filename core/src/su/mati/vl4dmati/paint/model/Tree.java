@@ -22,9 +22,9 @@ public class Tree {
         }
     }
 
-    public void render(SpriteBatch batch, float delta) {
+    public void draw(SpriteBatch batch, float delta) {
         for (TreeBlock block : tree) {
-            block.render(batch, delta);
+            block.draw(batch, delta);
         }
     }
 
@@ -39,7 +39,7 @@ public class Tree {
     public void onTouchDown() {
         tree.removeFirst();
         for (TreeBlock block : tree) {
-            block.setAnimation(-block.getHeight() * 10, 0, block.getHeight());
+            block.setAnimation(block.getHeight() * 7, 0, -block.getHeight());
         }
     }
 

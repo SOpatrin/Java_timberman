@@ -21,6 +21,10 @@ public class GameScreen implements Screen {
     private Person person;
     private BitmapFont font;
     private Texture background;
+    private float backgroundWidth;
+    private float backgroundHeight;
+    private float backgroundAspectRatio;
+    private float backgroundX;
     private int score = 0;
 
     @Override
@@ -32,6 +36,7 @@ public class GameScreen implements Screen {
         font.setColor(Color.WHITE);
         font.getData().setScale(0.3f);
         background = new Texture("background.jpeg");
+        backgroundAspectRatio = (float) background.getHeight() / background.getWidth();
         background.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
 
         // init objects
@@ -59,14 +64,24 @@ public class GameScreen implements Screen {
         update();
 
         batch.begin();
-        batch.draw(background, 0, 0, GameCamera.width, GameCamera.width * GameCamera.getAspectRatio());
-        tree.render(batch, delta);
-        person.render(batch, delta);
+        batch.draw(background, backgroundX, 0, backgroundWidth, backgroundHeight);
+        tree.draw(batch, delta);
+        person.draw(batch, delta);
         font.draw(batch, String.valueOf(score), GameCamera.center - (String.valueOf(score).length() * 42), GameCamera.width * GameCamera.getAspectRatio() - 100);
         batch.end();
     }
 
     public void update() {
+        // align background into the center with covered width and height
+        if ((float) background.getHeight()/background.getWidth() > GameCamera.getAspectRatio()) {
+            backgroundX = 0;
+            backgroundWidth = GameCamera.width;
+            backgroundHeight = GameCamera.width * backgroundAspectRatio;
+        } else {
+            backgroundX = GameCamera.center - (GameCamera.width * GameCamera.getAspectRatio())/2 / backgroundAspectRatio;
+            backgroundWidth = (GameCamera.width * GameCamera.getAspectRatio()) / backgroundAspectRatio;
+            backgroundHeight = GameCamera.width * GameCamera.getAspectRatio();
+        }
         tree.update();
     }
 

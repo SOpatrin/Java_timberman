@@ -1,7 +1,6 @@
 package su.mati.vl4dmati.paint.model;
 
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Polygon;
@@ -16,7 +15,7 @@ public abstract class GameObject {
     private float animationX = 0;
     private float animationY = 0;
     private float speed = 0;
-    private float animationIters = 0;
+    private float animationTime = 0;
 
 
     public GameObject(Texture texture, float x, float y) {
@@ -44,7 +43,7 @@ public abstract class GameObject {
         object.setSize(width, height);
     }
 
-    public void render(SpriteBatch batch, float delta){
+    public void draw(SpriteBatch batch, float delta){
         animate(delta);
         object.setPosition(bounds.getX(), bounds.getY());
         object.setRotation(bounds.getRotation());
@@ -77,8 +76,9 @@ public abstract class GameObject {
         }
         if (speed != 0) {
             this.speed = speed;
-            animationX = speed < 0 ? -x : x;
-            animationY = speed < 0 ? -y : y;
+            animationX = x;
+            animationY = y;
+            animationTime = (float) Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)) / speed;
         }
     }
 
@@ -96,23 +96,14 @@ public abstract class GameObject {
 
     private void animate(float delta) {
         if (speed != 0) {
-            if (Math.abs(animationX) > 0) {
-                bounds.translate(speed * delta, 0);
-                animationX -= speed * delta;
-            }
-            if (Math.abs(animationY) > 0) {
-                bounds.translate(0, speed * delta);
-                animationY -= speed * delta;
-            }
-            if (Math.abs(animationX) < Math.abs(speed * delta)) {
-                bounds.translate(animationX, 0);
-                animationX = 0;
-            }
-            if (Math.abs(animationY) < Math.abs(speed * delta)) {
-                bounds.translate(0, animationY);
-                animationY = 0;
-            }
-            if (animationX == 0 && animationY == 0) {
+            if (animationTime > delta) {
+                float deltaX = speed * delta * (animationX / (float) Math.sqrt(Math.pow(animationX, 2) + Math.pow(animationY, 2)));
+                float deltaY = speed * delta * (animationY / (float) Math.sqrt(Math.pow(animationX, 2) + Math.pow(animationY, 2)));
+                bounds.translate(deltaX, deltaY);
+                animationTime -= delta;
+                animationX -= deltaX;
+                animationY -= deltaY;
+            } else {
                 endAnimate();
             }
         }
