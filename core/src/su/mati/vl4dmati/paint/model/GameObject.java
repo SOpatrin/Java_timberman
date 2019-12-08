@@ -71,6 +71,7 @@ public abstract class GameObject {
     }
 
     public void setAnimation(float speed, float x, float y) {
+        // stop current animation
         if (this.speed != 0) {
             endAnimate();
         }

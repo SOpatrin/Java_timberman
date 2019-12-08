@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
+import su.mati.vl4dmati.paint.model.DeathScore;
 import su.mati.vl4dmati.paint.model.GameCamera;
 import su.mati.vl4dmati.paint.model.Person;
 import su.mati.vl4dmati.paint.model.Tree;
@@ -26,6 +27,7 @@ public class GameScreen implements Screen {
     private float backgroundAspectRatio;
     private float backgroundX;
     private int score = 0;
+    private DeathScore deathScore;
 
     @Override
     public void show() {
@@ -38,6 +40,7 @@ public class GameScreen implements Screen {
         background = new Texture("background.jpeg");
         backgroundAspectRatio = (float) background.getHeight() / background.getWidth();
         background.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        deathScore = new DeathScore();
 
         // init objects
         tree = new Tree();
@@ -50,6 +53,7 @@ public class GameScreen implements Screen {
                 person.onTouchDown(x, y);
                 tree.onTouchDown();
                 score++;
+                deathScore.onTouchDown();
                 return true;
             }
         });
@@ -61,17 +65,18 @@ public class GameScreen implements Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.setProjectionMatrix(camera.combined);
 
-        update();
+        update(delta);
 
         batch.begin();
         batch.draw(background, backgroundX, 0, backgroundWidth, backgroundHeight);
         tree.draw(batch, delta);
         person.draw(batch, delta);
-        font.draw(batch, String.valueOf(score), GameCamera.center - (String.valueOf(score).length() * 42), GameCamera.width * GameCamera.getAspectRatio() - 100);
+        font.draw(batch, String.valueOf(deathScore.getValue()), GameCamera.center - (String.valueOf(deathScore.getValue()).length() * 42), GameCamera.width * GameCamera.getAspectRatio() - 100);
+        font.draw(batch, String.valueOf(score), GameCamera.center - (String.valueOf(score).length() * 42), GameCamera.width * GameCamera.getAspectRatio() - 300);
         batch.end();
     }
 
-    public void update() {
+    public void update(float delta) {
         // align background into the center with covered width and height
         if ((float) background.getHeight()/background.getWidth() > GameCamera.getAspectRatio()) {
             backgroundX = 0;
@@ -83,6 +88,7 @@ public class GameScreen implements Screen {
             backgroundHeight = GameCamera.width * GameCamera.getAspectRatio();
         }
         tree.update();
+        deathScore.update(delta);
     }
 
     @Override
