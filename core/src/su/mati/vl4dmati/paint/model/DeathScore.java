@@ -1,12 +1,13 @@
 package su.mati.vl4dmati.paint.model;
 
 public class DeathScore {
+
     float value;
     float speed;
 
     public DeathScore() {
-        value = 150f;
-        speed = 10f;
+        value = 100f;
+        speed = 5f;
     }
 
     public void update(float delta) {

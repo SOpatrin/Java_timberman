@@ -1,5 +1,6 @@
 package su.mati.vl4dmati.paint.view;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.Screen;
@@ -8,9 +9,13 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Rectangle;
 
+import su.mati.vl4dmati.paint.Paint;
 import su.mati.vl4dmati.paint.model.DeathScore;
 import su.mati.vl4dmati.paint.model.GameCamera;
+import su.mati.vl4dmati.paint.model.GameObject;
 import su.mati.vl4dmati.paint.model.Person;
 import su.mati.vl4dmati.paint.model.Tree;
 
@@ -26,11 +31,14 @@ public class GameScreen implements Screen {
     private float backgroundHeight;
     private float backgroundAspectRatio;
     private float backgroundX;
-    private int score = 0;
+    private int score;
     private DeathScore deathScore;
+    private ShapeRenderer shapeRenderer;
+    private Paint game;
 
-    @Override
-    public void show() {
+    public GameScreen(Paint game) {
+        this.game = game;
+
         // init environment
         camera = new GameCamera();
         batch = new SpriteBatch();
@@ -38,8 +46,14 @@ public class GameScreen implements Screen {
         font.setColor(Color.WHITE);
         font.getData().setScale(0.3f);
         background = new Texture("background.jpeg");
+        shapeRenderer = new ShapeRenderer();
+    }
+
+    @Override
+    public void show() {
         backgroundAspectRatio = (float) background.getHeight() / background.getWidth();
         background.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        score = 0;
         deathScore = new DeathScore();
 
         // init objects
@@ -64,6 +78,7 @@ public class GameScreen implements Screen {
         Gdx.gl.glClearColor(1, 1, 1, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.setProjectionMatrix(camera.combined);
+        shapeRenderer.setProjectionMatrix(camera.combined);
 
         update(delta);
 
@@ -71,9 +86,23 @@ public class GameScreen implements Screen {
         batch.draw(background, backgroundX, 0, backgroundWidth, backgroundHeight);
         tree.draw(batch, delta);
         person.draw(batch, delta);
-        font.draw(batch, String.valueOf(deathScore.getValue()), GameCamera.center - (String.valueOf(deathScore.getValue()).length() * 42), GameCamera.width * GameCamera.getAspectRatio() - 100);
-        font.draw(batch, String.valueOf(score), GameCamera.center - (String.valueOf(score).length() * 42), GameCamera.width * GameCamera.getAspectRatio() - 300);
+        font.draw(batch, String.valueOf(score), GameCamera.center - (String.valueOf(score).length() * 42), GameCamera.width * GameCamera.getAspectRatio() - 200);
         batch.end();
+
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        shapeRenderer.setColor(204/255f, 204/255f, 0, 1);
+        shapeRenderer.rect(GameCamera.center - GameObject.basicWidth/2 - 10, GameCamera.width * GameCamera.getAspectRatio() - 100 - 10, GameObject.basicWidth + 20, GameObject.basicHeight/5 + 20);
+        shapeRenderer.end();
+
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        shapeRenderer.setColor(102/255f, 51/255f, 0, 1);
+        shapeRenderer.rect(GameCamera.center - GameObject.basicWidth/2, GameCamera.width * GameCamera.getAspectRatio() - 100, GameObject.basicWidth, GameObject.basicHeight/5);
+        shapeRenderer.end();
+
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        shapeRenderer.setColor(1, 0, 0, 1);
+        shapeRenderer.rect(GameCamera.center - GameObject.basicWidth/2, GameCamera.width * GameCamera.getAspectRatio() - 100, (deathScore.getValue()/150f)*GameObject.basicWidth, GameObject.basicHeight/5);
+        shapeRenderer.end();
     }
 
     public void update(float delta) {
@@ -89,6 +118,9 @@ public class GameScreen implements Screen {
         }
         tree.update();
         deathScore.update(delta);
+        if (deathScore.getValue() <= 0) {
+            game.onGameOver();
+        }
     }
 
     @Override
