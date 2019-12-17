@@ -65,6 +65,9 @@ public class GameScreen implements Screen {
             public boolean touchDown(int x, int y, int pointer, int button) {
                 if (pointer > 0 || button > 0) return false;
                 person.onTouchDown(x, y);
+                if (tree.isGameOver(person.left)) {
+                    game.onGameOver();
+                }
                 tree.onTouchDown();
                 score++;
                 deathScore.onTouchDown();
