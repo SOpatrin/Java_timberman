@@ -3,6 +3,7 @@ package su.mati.vl4dmati.paint.view;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
@@ -25,6 +26,8 @@ public class GameMenuScreen implements Screen {
     private float backgroundHeight;
     private float backgroundAspectRatio;
     private float backgroundX;
+    private Sound clickSound;
+    private Sound backgroundSound;
     private Paint game;
 
     public GameMenuScreen(final Paint game) {
@@ -41,21 +44,26 @@ public class GameMenuScreen implements Screen {
         startButton.setPosition(GameCamera.center - startButton.getWidth() / 2, GameCamera.center);
         exitButton = new Button(new Texture("exitButton.png"), 0, 0);
         exitButton.setPosition(GameCamera.center - startButton.getWidth() / 2, GameCamera.center);
+        clickSound = Gdx.audio.newSound(Gdx.files.internal("hat.mp3"));
+        backgroundSound = Gdx.audio.newSound(Gdx.files.internal("C418 - Moog City.mp3"));
     }
 
     @Override
     public void show() {
         backgroundAspectRatio = (float) background.getHeight() / background.getWidth();
         background.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        backgroundSound.loop(0.2f);
 
         Gdx.input.setInputProcessor(new InputAdapter() {
             public boolean touchDown(int x, int y, int pointer, int button) {
                 startButton.onTouchDown(x, y);
                 if (startButton.isPressed()) {
+                    clickSound.play(1f);
                     game.onStartGame();
                 }
                 exitButton.onTouchDown(x, y);
                 if (exitButton.isPressed()) {
+                    clickSound.play(1f);
                     game.exit();
                 }
                 return true;
@@ -115,11 +123,14 @@ public class GameMenuScreen implements Screen {
 
     @Override
     public void hide() {
-
+        backgroundSound.stop();
     }
 
     @Override
     public void dispose() {
-
+        batch.dispose();
+        font.dispose();
+        clickSound.dispose();
+        backgroundSound.dispose();
     }
 }

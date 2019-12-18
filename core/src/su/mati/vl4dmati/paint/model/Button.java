@@ -3,7 +3,6 @@ package su.mati.vl4dmati.paint.model;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 
-import su.mati.vl4dmati.paint.Paint;
 
 public class Button extends GameObject {
 

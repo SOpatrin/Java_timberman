@@ -4,6 +4,7 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
@@ -11,6 +12,9 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.Array;
+
+import java.util.Random;
 
 import su.mati.vl4dmati.paint.Paint;
 import su.mati.vl4dmati.paint.model.DeathScore;
@@ -27,6 +31,9 @@ public class GameScreen implements Screen {
     private Person person;
     private BitmapFont font;
     private Texture background;
+    private Array<Sound> woodSounds;
+    private Sound gameOverSound;
+    private Sound backgroundSound;
     private float backgroundWidth;
     private float backgroundHeight;
     private float backgroundAspectRatio;
@@ -46,6 +53,13 @@ public class GameScreen implements Screen {
         font.setColor(Color.WHITE);
         font.getData().setScale(0.3f);
         background = new Texture("background.jpg");
+        woodSounds = new Array<>();
+        woodSounds.add(Gdx.audio.newSound(Gdx.files.internal("wood1.mp3")),
+                Gdx.audio.newSound(Gdx.files.internal("wood2.mp3")),
+                Gdx.audio.newSound(Gdx.files.internal("wood3.mp3")),
+                Gdx.audio.newSound(Gdx.files.internal("wood4.mp3")));
+        gameOverSound = Gdx.audio.newSound(Gdx.files.internal("classic_hurt.mp3"));
+        backgroundSound = Gdx.audio.newSound(Gdx.files.internal("Static-X - The Only.mp3"));
         shapeRenderer = new ShapeRenderer();
     }
 
@@ -59,15 +73,18 @@ public class GameScreen implements Screen {
         tree = new Tree();
         person = new Person(new Texture("Idle.gif"), 0, 0);
         person.setPosition(GameCamera.center - person.getWidth(), 0);
+        backgroundSound.loop(0.05f);
 
         Gdx.input.setInputProcessor(new InputAdapter() {
             public boolean touchDown(int x, int y, int pointer, int button) {
                 if (pointer > 0 || button > 0) return false;
                 person.onTouchDown(x, y);
                 if (tree.isGameOver(person.left)) {
+                    gameOverSound.play(1f);
                     game.onGameOver();
                 }
                 tree.onTouchDown();
+                woodSounds.random().play(1f);
                 score++;
                 deathScore.onTouchDown();
                 return true;
@@ -161,13 +178,18 @@ public class GameScreen implements Screen {
 
     @Override
     public void hide() {
-
+        backgroundSound.stop();
     }
 
     @Override
     public void dispose() {
         batch.dispose();
         font.dispose();
+        for (Sound sound : woodSounds) {
+            sound.dispose();
+        }
+        gameOverSound.dispose();
+        backgroundSound.dispose();
     }
 
 }
