@@ -7,7 +7,7 @@ public class DeathScore {
 
     public DeathScore() {
         value = 100f;
-        speed = 5f;
+        speed = 7f;
     }
 
     public void update(float delta) {

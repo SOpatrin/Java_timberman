@@ -3,7 +3,6 @@ package su.mati.vl4dmati.paint.view;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -15,48 +14,43 @@ import su.mati.vl4dmati.paint.Paint;
 import su.mati.vl4dmati.paint.model.Button;
 import su.mati.vl4dmati.paint.model.Config;
 import su.mati.vl4dmati.paint.model.GameCamera;
+import su.mati.vl4dmati.paint.model.Score;
 
-public class GameMenuScreen implements Screen {
+public class GameScoreScreen implements Screen {
 
     private SpriteBatch batch;
     private GameCamera camera;
     private BitmapFont font;
     private Texture background;
-    private Button startButton;
-    private Button scoreButton;
-    private Button settingsButton;
-    private Button exitButton;
+    private Button backButton;
+    private Button clearButton;
     private float backgroundWidth;
     private float backgroundHeight;
     private float backgroundAspectRatio;
     private float backgroundX;
     private Sound clickSound;
-    private Music backgroundSound;
+    private Score score;
     private Paint game;
     private Config config;
 
-    public GameMenuScreen(final Paint game) {
+    public GameScoreScreen(final Paint game) {
         this.game = game;
 
         // init environment
         camera = new GameCamera();
         batch = new SpriteBatch();
         font = new BitmapFont(Gdx.files.internal("font.fnt"));
-        font.setColor(Color.RED);
+        font.setColor(Color.WHITE);
         font.getData().setScale(0.3f);
         background = new Texture("background.jpg");
 
-        startButton = new Button(new Texture("startButton.png"), 0, 0);
-        startButton.setPosition(GameCamera.center - startButton.getWidth() / 2, GameCamera.center);
-        scoreButton = new Button(new Texture("scoreButton.png"), 0, 0);
-        scoreButton.setPosition(GameCamera.center - startButton.getWidth() / 2, GameCamera.center);
-        settingsButton = new Button(new Texture("settingsButton.png"), 0, 0);
-        settingsButton.setPosition(GameCamera.center - startButton.getWidth() / 2, GameCamera.center);
-        exitButton = new Button(new Texture("exitButton.png"), 0, 0);
-        exitButton.setPosition(GameCamera.center - startButton.getWidth() / 2, GameCamera.center);
+        backButton = new Button(new Texture("backButton.png"), 0, 0);
+        backButton.setPosition(GameCamera.center - backButton.getWidth() / 2, GameCamera.center);
+        clearButton = new Button(new Texture("clearButton.png"), 0, 0);
+        clearButton.setPosition(GameCamera.center - backButton.getWidth() / 2, GameCamera.center);
 
         clickSound = Gdx.audio.newSound(Gdx.files.internal("hat.mp3"));
-        backgroundSound = Gdx.audio.newMusic(Gdx.files.internal("C418 - Moog City.mp3"));
+        score = new Score();
     }
 
     @Override
@@ -64,32 +58,18 @@ public class GameMenuScreen implements Screen {
         backgroundAspectRatio = (float) background.getHeight() / background.getWidth();
         background.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         config = new Config();
-        backgroundSound.setVolume(0.2f * config.getMasterVolume());
-        backgroundSound.play();
 
         Gdx.input.setInputProcessor(new InputAdapter() {
             public boolean touchDown(int x, int y, int pointer, int button) {
-                startButton.onTouchDown(x, y);
-                if (startButton.isPressed()) {
+                backButton.onTouchDown(x, y);
+                if (backButton.isPressed()) {
                     clickSound.play(1f * config.getMasterVolume());
-                    backgroundSound.stop();
-                    game.onStartGame();
+                    game.onGameMenu();
                 }
-                scoreButton.onTouchDown(x, y);
-                if (scoreButton.isPressed()) {
+                clearButton.onTouchDown(x, y);
+                if (clearButton.isPressed()) {
                     clickSound.play(1f * config.getMasterVolume());
-                    game.onScore();
-                }
-                settingsButton.onTouchDown(x, y);
-                if (settingsButton.isPressed()) {
-                    clickSound.play(1f * config.getMasterVolume());
-                    game.onSettings();
-                }
-                exitButton.onTouchDown(x, y);
-                if (exitButton.isPressed()) {
-                    clickSound.play(1f * config.getMasterVolume());
-                    backgroundSound.stop();
-                    game.exit();
+                    score.clear();
                 }
                 return true;
             }
@@ -120,22 +100,24 @@ public class GameMenuScreen implements Screen {
 
         batch.begin();
         batch.draw(background, backgroundX, 0, backgroundWidth, backgroundHeight);
-        startButton.setPosition(
-                GameCamera.center - startButton.getWidth() / 2,
+        font.draw(
+                batch,
+                "Best score:",
+                GameCamera.center - ("Best score:".length() * 36),
                 GameCamera.width * GameCamera.getAspectRatio() - 200);
-        startButton.draw(batch, delta);
-        scoreButton.setPosition(
-                GameCamera.center - startButton.getWidth() / 2,
-                GameCamera.width * GameCamera.getAspectRatio() - 250 - startButton.getHeight());
-        scoreButton.draw(batch, delta);
-        settingsButton.setPosition(
-                GameCamera.center - startButton.getWidth() / 2,
-                GameCamera.width * GameCamera.getAspectRatio() - 300 - startButton.getHeight() * 2);
-        settingsButton.draw(batch, delta);
-        exitButton.setPosition(
-                GameCamera.center - startButton.getWidth() / 2,
-                GameCamera.width * GameCamera.getAspectRatio() - 350 - startButton.getHeight() * 3);
-        exitButton.draw(batch, delta);
+        font.draw(
+                batch,
+                String.valueOf(score.readScore()),
+                GameCamera.center - (String.valueOf(score.readScore()).length() * 42),
+                GameCamera.width * GameCamera.getAspectRatio() - 350);
+        backButton.setPosition(
+                GameCamera.center - backButton.getWidth() - 25,
+                100);
+        backButton.draw(batch, delta);
+        clearButton.setPosition(
+                GameCamera.center + 25,
+                100);
+        clearButton.draw(batch, delta);
         batch.end();
     }
 
@@ -163,6 +145,5 @@ public class GameMenuScreen implements Screen {
         batch.dispose();
         font.dispose();
         clickSound.dispose();
-        backgroundSound.dispose();
     }
 }

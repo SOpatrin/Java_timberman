@@ -12,6 +12,7 @@ public class Button extends GameObject {
         super(texture, x, y);
         setScale(2f);
         pressed = false;
+        texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Linear);;
     }
 
     public void onTouchDown(float x, float y) {

@@ -1,9 +1,9 @@
 package su.mati.vl4dmati.paint.view;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -11,16 +11,15 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
-import java.util.Random;
-
 import su.mati.vl4dmati.paint.Paint;
+import su.mati.vl4dmati.paint.model.Config;
 import su.mati.vl4dmati.paint.model.DeathScore;
 import su.mati.vl4dmati.paint.model.GameCamera;
 import su.mati.vl4dmati.paint.model.GameObject;
 import su.mati.vl4dmati.paint.model.Person;
+import su.mati.vl4dmati.paint.model.Score;
 import su.mati.vl4dmati.paint.model.Tree;
 
 public class GameScreen implements Screen {
@@ -33,15 +32,16 @@ public class GameScreen implements Screen {
     private Texture background;
     private Array<Sound> woodSounds;
     private Sound gameOverSound;
-    private Sound backgroundSound;
+    private Music backgroundSound;
     private float backgroundWidth;
     private float backgroundHeight;
     private float backgroundAspectRatio;
     private float backgroundX;
-    private int score;
+    private Score score;
     private DeathScore deathScore;
     private ShapeRenderer shapeRenderer;
     private Paint game;
+    private Config config;
 
     public GameScreen(Paint game) {
         this.game = game;
@@ -53,39 +53,45 @@ public class GameScreen implements Screen {
         font.setColor(Color.WHITE);
         font.getData().setScale(0.3f);
         background = new Texture("background.jpg");
+
+
         woodSounds = new Array<>();
         woodSounds.add(Gdx.audio.newSound(Gdx.files.internal("wood1.mp3")),
                 Gdx.audio.newSound(Gdx.files.internal("wood2.mp3")),
                 Gdx.audio.newSound(Gdx.files.internal("wood3.mp3")),
                 Gdx.audio.newSound(Gdx.files.internal("wood4.mp3")));
         gameOverSound = Gdx.audio.newSound(Gdx.files.internal("classic_hurt.mp3"));
-        backgroundSound = Gdx.audio.newSound(Gdx.files.internal("Static-X - The Only.mp3"));
+        backgroundSound = Gdx.audio.newMusic(Gdx.files.internal("Static-X - The Only.mp3"));
+
         shapeRenderer = new ShapeRenderer();
     }
 
     @Override
     public void show() {
         backgroundAspectRatio = (float) background.getHeight() / background.getWidth();
-        score = 0;
+        score = new Score();
         deathScore = new DeathScore();
 
         // init objects
         tree = new Tree();
         person = new Person(new Texture("Idle.gif"), 0, 0);
         person.setPosition(GameCamera.center - person.getWidth(), 0);
-        backgroundSound.loop(0.05f);
+        config = new Config();
+        backgroundSound.setVolume(0.05f * config.getMasterVolume());
+        backgroundSound.play();
 
         Gdx.input.setInputProcessor(new InputAdapter() {
             public boolean touchDown(int x, int y, int pointer, int button) {
                 if (pointer > 0 || button > 0) return false;
                 person.onTouchDown(x, y);
                 if (tree.isGameOver(person.left)) {
-                    gameOverSound.play(1f);
+                    gameOverSound.play(1f * config.getMasterVolume());
+                    score.saveScore();
                     game.onGameOver();
                 }
                 tree.onTouchDown();
-                woodSounds.random().play(1f);
-                score++;
+                woodSounds.random().play(1f * config.getMasterVolume());
+                score.incrementScore();
                 deathScore.onTouchDown();
                 return true;
             }
@@ -107,8 +113,8 @@ public class GameScreen implements Screen {
         person.draw(batch, delta);
         font.draw(
                 batch,
-                String.valueOf(score),
-                GameCamera.center - (String.valueOf(score).length() * 42),
+                String.valueOf(score.getValue()),
+                GameCamera.center - (String.valueOf(score.getValue()).length() * 42),
                 GameCamera.width * GameCamera.getAspectRatio() - 200);
         batch.end();
 
@@ -157,6 +163,8 @@ public class GameScreen implements Screen {
         tree.update();
         deathScore.update(delta);
         if (deathScore.getValue() <= 0) {
+            gameOverSound.play(1f * config.getMasterVolume());
+            score.saveScore();
             game.onGameOver();
         }
     }
