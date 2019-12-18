@@ -45,14 +45,13 @@ public class GameScreen implements Screen {
         font = new BitmapFont(Gdx.files.internal("font.fnt"));
         font.setColor(Color.WHITE);
         font.getData().setScale(0.3f);
-        background = new Texture("background.jpeg");
+        background = new Texture("background.jpg");
         shapeRenderer = new ShapeRenderer();
     }
 
     @Override
     public void show() {
         backgroundAspectRatio = (float) background.getHeight() / background.getWidth();
-        background.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         score = 0;
         deathScore = new DeathScore();
 
@@ -89,22 +88,38 @@ public class GameScreen implements Screen {
         batch.draw(background, backgroundX, 0, backgroundWidth, backgroundHeight);
         tree.draw(batch, delta);
         person.draw(batch, delta);
-        font.draw(batch, String.valueOf(score), GameCamera.center - (String.valueOf(score).length() * 42), GameCamera.width * GameCamera.getAspectRatio() - 200);
+        font.draw(
+                batch,
+                String.valueOf(score),
+                GameCamera.center - (String.valueOf(score).length() * 42),
+                GameCamera.width * GameCamera.getAspectRatio() - 200);
         batch.end();
 
+        // render death score bar
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         shapeRenderer.setColor(204/255f, 204/255f, 0, 1);
-        shapeRenderer.rect(GameCamera.center - GameObject.basicWidth/2 - 10, GameCamera.width * GameCamera.getAspectRatio() - 100 - 10, GameObject.basicWidth + 20, GameObject.basicHeight/5 + 20);
+        shapeRenderer.rect(
+                GameCamera.center - GameObject.basicWidth/2 - 10,
+                GameCamera.width * GameCamera.getAspectRatio() - 100 - 10,
+                GameObject.basicWidth + 20,
+                GameObject.basicHeight/5 + 20);
         shapeRenderer.end();
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         shapeRenderer.setColor(102/255f, 51/255f, 0, 1);
-        shapeRenderer.rect(GameCamera.center - GameObject.basicWidth/2, GameCamera.width * GameCamera.getAspectRatio() - 100, GameObject.basicWidth, GameObject.basicHeight/5);
+        shapeRenderer.rect(
+                GameCamera.center - GameObject.basicWidth/2,
+                GameCamera.width * GameCamera.getAspectRatio() - 100,
+                GameObject.basicWidth, GameObject.basicHeight/5);
         shapeRenderer.end();
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         shapeRenderer.setColor(1, 0, 0, 1);
-        shapeRenderer.rect(GameCamera.center - GameObject.basicWidth/2, GameCamera.width * GameCamera.getAspectRatio() - 100, (deathScore.getValue()/150f)*GameObject.basicWidth, GameObject.basicHeight/5);
+        shapeRenderer.rect(
+                GameCamera.center - GameObject.basicWidth/2,
+                GameCamera.width * GameCamera.getAspectRatio() - 100,
+                (deathScore.getValue() / 150f) * GameObject.basicWidth,
+                GameObject.basicHeight / 5);
         shapeRenderer.end();
     }
 
@@ -115,7 +130,10 @@ public class GameScreen implements Screen {
             backgroundWidth = GameCamera.width;
             backgroundHeight = GameCamera.width * backgroundAspectRatio;
         } else {
-            backgroundX = GameCamera.center - (GameCamera.width * GameCamera.getAspectRatio())/2 / backgroundAspectRatio;
+            backgroundX = GameCamera.center
+                    - (GameCamera.width
+                    * GameCamera.getAspectRatio()) / 2
+                    / backgroundAspectRatio;
             backgroundWidth = (GameCamera.width * GameCamera.getAspectRatio()) / backgroundAspectRatio;
             backgroundHeight = GameCamera.width * GameCamera.getAspectRatio();
         }

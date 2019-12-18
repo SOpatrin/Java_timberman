@@ -24,6 +24,7 @@ public class Tree {
         block.setPosition(GameCamera.center - block.getWidth()/2, block.getHeight() * position);
         tree.addLast(block);
 
+        // random generate tree branch
         if ((tree.size > 2) && (branches.isEmpty() || !branches.last().getBlock().equals(tree.get(tree.size - 2)))) {
             if (random.nextBoolean()) {
                 boolean left = random.nextBoolean();

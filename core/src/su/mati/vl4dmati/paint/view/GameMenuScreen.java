@@ -1,6 +1,5 @@
 package su.mati.vl4dmati.paint.view;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.Screen;
@@ -11,21 +10,24 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 import su.mati.vl4dmati.paint.Paint;
+import su.mati.vl4dmati.paint.model.Button;
 import su.mati.vl4dmati.paint.model.GameCamera;
 
-public class GameOverScreen implements Screen {
+public class GameMenuScreen implements Screen {
 
     private SpriteBatch batch;
     private GameCamera camera;
     private BitmapFont font;
     private Texture background;
+    private Button startButton;
+    private Button exitButton;
     private float backgroundWidth;
     private float backgroundHeight;
     private float backgroundAspectRatio;
     private float backgroundX;
     private Paint game;
 
-    public GameOverScreen(final Paint game) {
+    public GameMenuScreen(final Paint game) {
         this.game = game;
 
         // init environment
@@ -35,6 +37,10 @@ public class GameOverScreen implements Screen {
         font.setColor(Color.RED);
         font.getData().setScale(0.3f);
         background = new Texture("background.jpg");
+        startButton = new Button(new Texture("startButton.png"), 0, 0);
+        startButton.setPosition(GameCamera.center - startButton.getWidth() / 2, GameCamera.center);
+        exitButton = new Button(new Texture("exitButton.png"), 0, 0);
+        exitButton.setPosition(GameCamera.center - startButton.getWidth() / 2, GameCamera.center);
     }
 
     @Override
@@ -44,7 +50,14 @@ public class GameOverScreen implements Screen {
 
         Gdx.input.setInputProcessor(new InputAdapter() {
             public boolean touchDown(int x, int y, int pointer, int button) {
-                game.onGameMenu();
+                startButton.onTouchDown(x, y);
+                if (startButton.isPressed()) {
+                    game.onStartGame();
+                }
+                exitButton.onTouchDown(x, y);
+                if (exitButton.isPressed()) {
+                    game.exit();
+                }
                 return true;
             }
         });
@@ -66,17 +79,22 @@ public class GameOverScreen implements Screen {
                     - (GameCamera.width
                     * GameCamera.getAspectRatio()) / 2
                     / backgroundAspectRatio;
-            backgroundWidth = (GameCamera.width * GameCamera.getAspectRatio()) / backgroundAspectRatio;
+            backgroundWidth = (GameCamera.width
+                    * GameCamera.getAspectRatio())
+                    / backgroundAspectRatio;
             backgroundHeight = GameCamera.width * GameCamera.getAspectRatio();
         }
 
         batch.begin();
         batch.draw(background, backgroundX, 0, backgroundWidth, backgroundHeight);
-        font.draw(
-                batch,
-                "Game over",
-                GameCamera.center - ("Game over".length() * 42),
+        startButton.setPosition(
+                GameCamera.center - startButton.getWidth() / 2,
                 GameCamera.width * GameCamera.getAspectRatio() - 200);
+        startButton.draw(batch, delta);
+        exitButton.setPosition(
+                GameCamera.center - startButton.getWidth() / 2,
+                GameCamera.width * GameCamera.getAspectRatio() - 250 - startButton.getHeight());
+        exitButton.draw(batch, delta);
         batch.end();
     }
 

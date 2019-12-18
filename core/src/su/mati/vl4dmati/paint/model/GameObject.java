@@ -20,9 +20,8 @@ public abstract class GameObject {
 
     public GameObject(Texture texture, float x, float y) {
         // setup texture
-        texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         width = basicWidth;
-        height = basicHeight * (float) texture.getWidth()/texture.getHeight();
+        height = basicHeight * (float) texture.getHeight()/texture.getWidth();
         object = new Sprite(texture);
         object.setOrigin(width / 2f, height / 2f);
         object.setPosition(x, y);

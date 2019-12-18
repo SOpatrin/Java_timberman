@@ -10,7 +10,7 @@ public class Person extends GameObject {
     public Person(Texture texture, float x, float y) {
         super(texture, x, y);
         left = true;
-        setScale(2f);
+        setScale(1.5f);
     }
 
     public void onTouchDown(int x, int y) {
